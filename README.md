@@ -50,3 +50,32 @@ by passing parameters `start-key`, `select-key` and/or `start-cmd` to `init`, e.
 ```
 multi-select:init &start-key=Alt-L &select-key=Alt-F &start-cmd=$edit:completion:start~
 ```
+
+### path-exp
+This module provides expansion for paths in completions, eg. `/u/share` will
+expand to `/usr/share`. The expansion is only executed if the base directory
+does not exist. So if you have two directories `/path/to/dir` and `/path/to/dir2` 
+calling
+```
+cd /path/to/dir/<TAB>
+```
+will not show completions to `dir2`.
+
+This module requires zzamboni's elvish-completions package, install it via
+```
+use epm
+epm:install github.com/zzamboni/elvish-completions
+```
+
+To use `path-exp` put this in your `rc.elv`
+```
+use github.com/joe-batt/elvish-pkgs/path-exp
+path-exp:init
+```
+
+This will setup the path expansion for `cd` completion as well as for default
+completion. You can disable these by passing the options `&use-cd=$false` or 
+`&use-default=$false` to init, e.g
+```
+path-exp:init &use-cd=$false
+```
