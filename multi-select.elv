@@ -17,25 +17,31 @@
 # &start-key: key to start completion. default Tab
 
 use str
+use ./parse
 
 var -seed-cmd
 var -start-cmd
+var -start-dot
 
 # store the current command in -seed-cmd and start completion
 fn completion-start {
-  set @-seed-cmd = (str:split " " $edit:current-command)
+  set @-seed-cmd = (parse:split-words $edit:current-command)
+  set -start-dot = $edit:-dot
   $-start-cmd
 }
 
 # select current entry from listing and restart completion with the last
 # element of the stored command in -seed-cmd
 fn completion-multi-select {
+  var @current-seed = (parse:word-at-dot $-start-dot $@-seed-cmd)
+  
   edit:listing:accept
-  if (str:has-suffix $edit:current-command /) {
-    set edit:current-command = $edit:current-command" "
-  }
-  set edit:current-command = $edit:current-command$-seed-cmd[-1]
-  $-start-cmd
+  var @current-word = (parse:word-at-dot $-start-dot (parse:split-words $edit:current-command))
+  put $edit:current-command[$current-word[1]..-1]
+  set edit:current-command = $edit:current-command[0..$current-word[1]]" "$current-seed[0]" "(str:trim-left $edit:current-command[$current-word[1]..] " ")
+  set edit:-dot = (+ $current-word[1] (count $current-seed[0]) 1)
+  
+  completion-start
 }
 
 # setup key bindings and store preferred completion command
